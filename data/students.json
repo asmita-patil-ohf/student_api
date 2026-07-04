@@ -1,21 +1,7 @@
 [
     {
-        "std_id": 852,
-        "name": "BSD",
-        "roll_no": 12,
-        "grade": "A",
-        "email": "abc123@example.com"
-    },
-    {
         "std_id": 123,
         "name": "ata",
-        "roll_no": 12,
-        "grade": "A",
-        "email": "abc123@example.com"
-    },
-    {
-        "std_id": 456,
-        "name": "asmita",
         "roll_no": 12,
         "grade": "A",
         "email": "abc123@example.com"

@@ -8,11 +8,14 @@ def search(student_id):
     return -1;
 
 def read_students():
-    with open("data/students.json","r") as file:
-        students = json.load(file) 
-        return students
+    try:
+        with open("data/students.json", "r") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
 
 def write_students(students):
     with open("data/students.json","w") as file:
         json.dump(students,file,indent=4)
         
+ 
