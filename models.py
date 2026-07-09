@@ -5,7 +5,11 @@ from database import Base
 
 class Student(Base):
     __tablename__ = "students"
+
     std_id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    roll_no = Column(Integer)
+    grade = Column(String(5))
 
 
 class Student(BaseModel):
