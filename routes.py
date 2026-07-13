@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models import Student
+from schemas import CreateStudent
 from utils import search, read_students, write_students
 
 import json
@@ -10,8 +10,8 @@ router = APIRouter()
 def all_students():
     return read_students()
 
-@router.get("/students/{student_id}", response_model=Student)
-def id_student(student_id:int)->Student:
+@router.get("/students/{student_id}", response_model=CreateStudent)
+def id_student(student_id:int)->CreateStudent:
         students = read_students()
         get_index=search(student_id)    
         if get_index == -1: 
@@ -19,7 +19,7 @@ def id_student(student_id:int)->Student:
         return students[get_index]
     
 @router.post("/students")
-def create_student(student:Student):
+def create_student(student:CreateStudent):
     verify_stud=search(student.std_id)
     if verify_stud != -1: 
         raise HTTPException(status_code=409, detail="Student already added!") 
@@ -31,7 +31,7 @@ def create_student(student:Student):
         }
 
 @router.put("/students/{student_id}")
-def update_student(student_id:int,student:Student):
+def update_student(student_id:int,student:CreateStudent):
         duplicate_index = search(student.std_id)
         if duplicate_index != -1 and student.std_id != student_id: 
             raise HTTPException(status_code=409, detail="Student already added!") 
