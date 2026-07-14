@@ -1,6 +1,12 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from dependencies import get_db
+from models import Student
 from schemas import CreateStudent
+
 from utils import search, read_students, write_students
+
 
 import json
 
@@ -18,6 +24,39 @@ def id_student(student_id:int)->CreateStudent:
             raise HTTPException(status_code=404, detail="Student not found!")
         return students[get_index]
     
+
+@router.post("/students") 
+def create_student(student: CreateStudent, db: Session = Depends(get_db)):
+        db_student = Student(**student.model_dump())
+        db.add(db_student)
+        db.commit()
+        db.refresh(db_student)
+        return db_student
+
+@router.put("/students/{student_id}")
+def update_student(student_id:int,student:CreateStudent, db: Session = Depends(get_db)):
+        db_student = Student(**student.model_dump())
+        db.update(db_student)
+        db.commit()
+        db.refresh(db_student)
+        return db_student
+
+
+@router.delete("/students/{student_id}")
+def delete_student(student_id:int):
+        del_index=search(student_id)
+        if del_index == -1: 
+            raise HTTPException(status_code=404, detail="Student not found!")
+        students = read_students()
+        del students[del_index]
+        write_students(students)
+        return {
+            "message":"Student deleted successfully"
+        }
+
+    
+    
+    
 @router.post("/students")
 def create_student(student:CreateStudent):
     verify_stud=search(student.std_id)
@@ -29,7 +68,8 @@ def create_student(student:CreateStudent):
     return {
             "message":"Student added successfully"
         }
-
+    
+    
 @router.put("/students/{student_id}")
 def update_student(student_id:int,student:CreateStudent):
         duplicate_index = search(student.std_id)
@@ -45,17 +85,3 @@ def update_student(student_id:int,student:CreateStudent):
         return {
             "message":"Student updated successfully"
         }
-
-@router.delete("/students/{student_id}")
-def delete_student(student_id:int):
-        del_index=search(student_id)
-        if del_index == -1: 
-            raise HTTPException(status_code=404, detail="Student not found!")
-        students = read_students()
-        del students[del_index]
-        write_students(students)
-        return {
-            "message":"Student deleted successfully"
-        }
-
-    
