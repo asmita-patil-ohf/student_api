@@ -53,6 +53,22 @@ def update_student(student_id:int,student:CreateStudent, db: Session = Depends(g
         db.refresh(db_student)
         return db_student
 
+@router.delete("/students/{student_id}")
+def delete_student(student_id:int, db: Session = Depends(get_db)):
+    db_student = (
+        db.query(Student)
+        .filter(Student.id == student_id)
+        .first()
+    )
+    if db_student is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found"
+        )
+    db.delete(db_student)
+    db.commit()
+    return 
+
 
 @router.delete("/students/{student_id}")
 def delete_student(student_id:int):
