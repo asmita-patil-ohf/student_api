@@ -35,8 +35,20 @@ def create_student(student: CreateStudent, db: Session = Depends(get_db)):
 
 @router.put("/students/{student_id}")
 def update_student(student_id:int,student:CreateStudent, db: Session = Depends(get_db)):
-        db_student = Student(**student.model_dump())
-        db.update(db_student)
+        db_student = (
+            db.query(Student)
+            .filter(Student.id == student_id)
+            .first()
+        )
+        if db_student is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Student not found"
+            )
+        db_student.name= student.name
+        db_student.roll_no= student.roll_no
+        db_student.email= student.email
+        db_student.grade= student.grade
         db.commit()
         db.refresh(db_student)
         return db_student
