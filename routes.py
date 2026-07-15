@@ -12,18 +12,19 @@ import json
 
 router = APIRouter()
 
-@router.get("/")
-def all_students():
-    return read_students()
-
-@router.get("/students/{student_id}", response_model=CreateStudent)
-def id_student(student_id:int)->CreateStudent:
-        students = read_students()
-        get_index=search(student_id)    
-        if get_index == -1: 
-            raise HTTPException(status_code=404, detail="Student not found!")
-        return students[get_index]
-    
+@router.get("/students/{student.id}")
+def get_student(student_id: CreateStudent, db:Session = Depends(get_db)):
+        db_student = (
+            db.query(Student)
+            .filter(Student.id == student_id)
+            .first()
+        )
+        if db_student is None:
+            raise HTTPException (
+                status_code=404,
+                detail="Student not found"
+            )
+        return db_student
 
 @router.post("/students") 
 def create_student(student: CreateStudent, db: Session = Depends(get_db)):
@@ -70,6 +71,22 @@ def delete_student(student_id:int, db: Session = Depends(get_db)):
     return 
 
 
+
+
+
+
+
+@router.get("/")
+def all_students():
+    return read_students()
+
+@router.get("/students/{student_id}", response_model=CreateStudent)
+def id_student(student_id:int)->CreateStudent:
+        students = read_students()
+        get_index=search(student_id)    
+        if get_index == -1: 
+            raise HTTPException(status_code=404, detail="Student not found!")
+        return students[get_index]
 @router.delete("/students/{student_id}")
 def delete_student(student_id:int):
         del_index=search(student_id)
