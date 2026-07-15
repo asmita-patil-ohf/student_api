@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from dependencies import get_db
 from models import Student
-from schemas import CreateStudent
+from schemas import CreateStudent, StudentResponse
 
 from utils import search, read_students, write_students
 
@@ -12,8 +12,17 @@ import json
 
 router = APIRouter()
 
+@router.get("/students")
+def get_all_studnets(student_id: StudentResponse, db:Session = Depends(get_db)):
+    db_students = (
+            db.query(Student)
+            .filter(Student.id == student_id)
+            .all()
+        )
+    return db_students
+
 @router.get("/students/{student.id}")
-def get_student(student_id: CreateStudent, db:Session = Depends(get_db)):
+def get_student(student_id: StudentResponse, db:Session = Depends(get_db)):
         db_student = (
             db.query(Student)
             .filter(Student.id == student_id)
@@ -32,7 +41,9 @@ def create_student(student: CreateStudent, db: Session = Depends(get_db)):
         db.add(db_student)
         db.commit()
         db.refresh(db_student)
-        return db_student
+        return {
+            "message": "Student added successfully"
+        }
 
 @router.put("/students/{student_id}")
 def update_student(student_id:int,student:CreateStudent, db: Session = Depends(get_db)):
@@ -52,7 +63,9 @@ def update_student(student_id:int,student:CreateStudent, db: Session = Depends(g
         db_student.grade= student.grade
         db.commit()
         db.refresh(db_student)
-        return db_student
+        return {
+            "message": "Student updated successfully"
+        }
 
 @router.delete("/students/{student_id}")
 def delete_student(student_id:int, db: Session = Depends(get_db)):
@@ -68,7 +81,9 @@ def delete_student(student_id:int, db: Session = Depends(get_db)):
         )
     db.delete(db_student)
     db.commit()
-    return 
+    return {
+            "message": "Student deleted successfully"
+        }
 
 
 
