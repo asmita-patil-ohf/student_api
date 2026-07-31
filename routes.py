@@ -5,24 +5,20 @@ from dependencies import get_db
 from models import Student
 from schemas import CreateStudent, StudentResponse
 
-from utils import search, read_students, write_students
-
-
-import json
+from typing import List
 
 router = APIRouter()
 
-@router.get("/students")
-def get_all_studnets(student_id: StudentResponse, db:Session = Depends(get_db)):
+@router.get("/", response_model=List[StudentResponse])
+def get_all_studnets(db:Session = Depends(get_db)):
     db_students = (
             db.query(Student)
-            .filter(Student.id == student_id)
             .all()
         )
     return db_students
 
-@router.get("/students/{student.id}")
-def get_student(student_id: StudentResponse, db:Session = Depends(get_db)):
+@router.get("/students/{student_id}", response_model=StudentResponse)
+def get_student(student_id, db:Session = Depends(get_db)):
         db_student = (
             db.query(Student)
             .filter(Student.id == student_id)
@@ -83,65 +79,4 @@ def delete_student(student_id:int, db: Session = Depends(get_db)):
     db.commit()
     return {
             "message": "Student deleted successfully"
-        }
-
-
-
-
-
-
-
-@router.get("/")
-def all_students():
-    return read_students()
-
-@router.get("/students/{student_id}", response_model=CreateStudent)
-def id_student(student_id:int)->CreateStudent:
-        students = read_students()
-        get_index=search(student_id)    
-        if get_index == -1: 
-            raise HTTPException(status_code=404, detail="Student not found!")
-        return students[get_index]
-@router.delete("/students/{student_id}")
-def delete_student(student_id:int):
-        del_index=search(student_id)
-        if del_index == -1: 
-            raise HTTPException(status_code=404, detail="Student not found!")
-        students = read_students()
-        del students[del_index]
-        write_students(students)
-        return {
-            "message":"Student deleted successfully"
-        }
-
-    
-    
-    
-@router.post("/students")
-def create_student(student:CreateStudent):
-    verify_stud=search(student.std_id)
-    if verify_stud != -1: 
-        raise HTTPException(status_code=409, detail="Student already added!") 
-    students = read_students()
-    students.append(student.model_dump())
-    write_students(students)
-    return {
-            "message":"Student added successfully"
-        }
-    
-    
-@router.put("/students/{student_id}")
-def update_student(student_id:int,student:CreateStudent):
-        duplicate_index = search(student.std_id)
-        if duplicate_index != -1 and student.std_id != student_id: 
-            raise HTTPException(status_code=409, detail="Student already added!") 
-        update_index=search(student_id)
-        if update_index == -1: 
-            raise HTTPException(status_code=404, detail="Student not found!")
-        students = read_students()
-        student=student.model_dump()
-        students[update_index]=student
-        write_students(students)
-        return {
-            "message":"Student updated successfully"
         }
